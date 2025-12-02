@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  # MongoDB
+  mongodb:
+    image: mongo:7.0
+    container_name: blink-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=blink
+    networks:
+      - blink-network
+
+  # Redis
+  redis:
+    image: redis:7-alpine
+    container_name: blink-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - blink-network
+
+  # Kafka + Zookeeper
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: blink-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - blink-network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: blink-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - blink-network
+
+  # MongoDB Express (GUI - Optional)
+  mongo-express:
+    image: mongo-express:latest
+    container_name: blink-mongo-express
+    ports:
+      - "8088:8081"
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongodb
+    depends_on:
+      - mongodb
+    networks:
+      - blink-network
+
+  # Redis Commander (GUI - Optional)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: blink-redis-commander
+    ports:
+      - "8089:8081"
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    depends_on:
+      - redis
+    networks:
+      - blink-network
+
+volumes:
+  mongodb_data:
+  redis_data:
+
+networks:
+  blink-network:
+    driver: bridge
