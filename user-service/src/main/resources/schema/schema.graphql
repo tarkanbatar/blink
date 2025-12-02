@@ -1,0 +1,71 @@
+type User {
+    id: ID! 
+    email: String! 
+    firstName: String! 
+    lastName: String!
+    phone: String
+    addresses: [Address]
+    createdAt: String
+    updatedAt: String
+}
+
+type Address {
+    id: ID!
+    title: String!
+    addressLine1: String! 
+    addressLine2: String
+    city: String! 
+    state: String
+    country: String!
+    zipCode: String! 
+    isDefault: Boolean! 
+}
+
+type AuthPayload {
+    token: String!
+    user: User! 
+}
+
+type Query {
+    me: User
+    user(id: ID! ): User
+    users: [User]! 
+}
+
+type Mutation {
+    register(input: RegisterInput!): AuthPayload! 
+    login(input: LoginInput!): AuthPayload!
+    updateProfile(input: UpdateProfileInput!): User! 
+    addAddress(input: AddressInput!): User!
+    deleteAddress(addressId: ID!): User!
+}
+
+input RegisterInput {
+    email: String!
+    password: String!
+    firstName: String! 
+    lastName: String! 
+    phone: String
+}
+
+input LoginInput {
+    email: String!
+    password: String! 
+}
+
+input UpdateProfileInput {
+    firstName: String
+    lastName: String
+    phone: String
+}
+
+input AddressInput {
+    title: String!
+    addressLine1: String! 
+    addressLine2: String
+    city: String!
+    state: String
+    country: String! 
+    zipCode: String!
+    isDefault: Boolean
+}
