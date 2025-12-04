@@ -25,8 +25,8 @@ public class UserResponse {
     public static UserResponse fromUser(User user) {
         return UserResponse.builder()
             .id(user.getId())
-            .firstName(user.getName())
-            .lastName(user.getSurname())
+            .firstName(user.getFirstName())
+            .lastName(user.getLastName())
             .email(user.getEmail())
             .phone(user.getPhone())
             .addresses(user.getAddresses())
