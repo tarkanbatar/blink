@@ -13,7 +13,7 @@ public class RegisterRequest {
 
     @NotBlank(message = "Password can not be empty")
     @Pattern(
-        regexp = "^(? =.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*? &])[A-Za-z\\d@$!%*?&]{8,}$",
+        regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$",
         message = "Password should contains 8 characters, 1 uppercase letter, 1 lowercase letter, 1 digit, and 1 special character"
     ) 
     private String password;
