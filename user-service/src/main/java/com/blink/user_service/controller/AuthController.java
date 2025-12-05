@@ -2,6 +2,7 @@ package com.blink.user_service.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.blink.user_service.dto.request.LoginRequest;
 import com.blink.user_service.dto.request.RegisterRequest;
 import com.blink.user_service.dto.response.AuthResponse;
 import com.blink.user_service.service.UserService;
@@ -36,9 +37,9 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody RegisterRequest request) {
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         log.info("Received login request for email: {}", request.getEmail());
-        AuthResponse response = userService.register(request);
+        AuthResponse response = userService.login(request);
         log.info("User logged in successfully with email: {}", request.getEmail());
         return ResponseEntity.ok(response);
     }
