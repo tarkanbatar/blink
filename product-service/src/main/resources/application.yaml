@@ -1,0 +1,29 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: product-service
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/ecommerce_products
+    redis:
+      host: localhost
+      port: 6379
+  cache:
+    type: redis
+    redis:
+      time-to-live: 3600000  # 1 saat (milisaniye)
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
