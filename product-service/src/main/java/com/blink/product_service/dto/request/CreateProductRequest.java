@@ -31,7 +31,7 @@ public class CreateProductRequest {
     private BigDecimal price;
 
     @DecimalMin(value = "0.01", message = "Discounted price must be greater than 0")
-    private BigDecimal discountedPrice;
+    private BigDecimal discountPrice;
 
     @NotBlank(message = "Category must be selected")
     private String categoryId;

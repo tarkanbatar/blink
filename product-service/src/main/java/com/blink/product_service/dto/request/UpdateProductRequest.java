@@ -21,7 +21,7 @@ public class UpdateProductRequest {
     private BigDecimal price;
 
     @DecimalMin(value = "0. 00", message = "İndirimli fiyat negatif olamaz")
-    private BigDecimal discountedPrice;
+    private BigDecimal discountPrice;
 
     private String categoryId;
 

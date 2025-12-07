@@ -84,10 +84,6 @@ public class Product implements Serializable {
         return discountPercentage.intValue();
     }
 
-    public BigDecimal getDiscountedPrice() {
-        return discountPrice != null ? discountPrice : price;
-    }
-
     public boolean isInStock() {
         return stock > 0;
     }

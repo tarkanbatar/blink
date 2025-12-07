@@ -18,7 +18,7 @@ public class ProductResponse {
     private String description;
     private String sku;
     private BigDecimal price;
-    private BigDecimal discountedPrice;
+    private BigDecimal discountPrice;
     private Integer discountPercentage;
     private String categoryId;
     private String categoryName;  // Category bilgisi de eklenecek
@@ -41,7 +41,7 @@ public class ProductResponse {
                 .description(product. getDescription())
                 .sku(product.getSku())
                 .price(product.getPrice())
-                .discountedPrice(product.getDiscountedPrice())
+                .discountPrice(product.getDiscountPrice())
                 .discountPercentage(product.getDiscountPercentage())
                 .categoryId(product.getCategoryId())
                 .stock(product.getStock())
