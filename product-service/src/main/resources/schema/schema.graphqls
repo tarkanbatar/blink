@@ -1,0 +1,143 @@
+type Product {
+    id: ID!
+    name: String!
+    description: String
+    sku: String! 
+    price: Float! 
+    discountedPrice: Float
+    discountPercentage: Int
+    categoryId: String!
+    categoryName: String
+    stock: Int! 
+    inStock: Boolean! 
+    images: [String]
+    brand: String
+    attributes: [ProductAttribute]
+    rating: Float! 
+    reviewCount: Int! 
+    active: Boolean!
+    featured: Boolean!
+    createdAt: String
+    updatedAt: String
+}
+
+type ProductAttribute {
+    key: String!
+    value: String! 
+}
+
+type Category {
+    id: ID!
+    name: String!
+    description: String
+    parentId: String
+    imageUrl: String
+    active: Boolean!
+    displayOrder: Int! 
+    subCategories: [Category]
+}
+
+type ProductPage {
+    content: [Product]! 
+    currentPage: Int! 
+    totalPages: Int! 
+    totalElements: Int!
+    size: Int!
+    first: Boolean!
+    last: Boolean!
+    empty: Boolean!
+}
+
+type Query {
+    # Product Queries
+    product(id: ID!): Product
+    productBySku(sku: String!): Product
+    products(page: Int = 0, size: Int = 20): ProductPage! 
+    productsByCategory(categoryId: ID!, page: Int = 0, size: Int = 20): ProductPage!
+    searchProducts(filter: ProductFilterInput! ): ProductPage! 
+    featuredProducts: [Product]! 
+
+    # Category Queries
+    category(id: ID!): Category
+    categories: [Category]! 
+    rootCategories: [Category]!
+    subCategories(parentId: ID! ): [Category]! 
+}
+
+type Mutation {
+    # Product Mutations
+    createProduct(input: CreateProductInput!): Product! 
+    updateProduct(id: ID!, input: UpdateProductInput! ): Product!
+    deleteProduct(id: ID!): Boolean! 
+    updateStock(id: ID!, quantity: Int!): Product! 
+
+    # Category Mutations
+    createCategory(input: CreateCategoryInput!): Category! 
+    updateCategory(id: ID!, input: UpdateCategoryInput!): Category! 
+    deleteCategory(id: ID!): Boolean!
+}
+
+input CreateProductInput {
+    name: String! 
+    description: String
+    sku: String!
+    price: Float!
+    discountedPrice: Float
+    categoryId: String! 
+    stock: Int = 0
+    images: [String]
+    brand: String
+    attributes: [AttributeInput]
+    featured: Boolean = false
+}
+
+input UpdateProductInput {
+    name: String
+    description: String
+    price: Float
+    discountedPrice: Float
+    categoryId: String
+    stock: Int
+    images: [String]
+    brand: String
+    attributes: [AttributeInput]
+    active: Boolean
+    featured: Boolean
+}
+
+input AttributeInput {
+    key: String! 
+    value: String! 
+}
+
+input ProductFilterInput {
+    categoryId: String
+    brands: [String]
+    minPrice: Float
+    maxPrice: Float
+    inStock: Boolean
+    featured: Boolean
+    minRating: Float
+    keyword: String
+    sortBy: String = "createdAt"
+    sortDirection: String = "desc"
+    page: Int = 0
+    size: Int = 20
+}
+
+input CreateCategoryInput {
+    name: String! 
+    description: String
+    parentId: String
+    imageUrl: String
+    displayOrder: Int = 0
+}
+
+input UpdateCategoryInput {
+    name: String
+    description: String
+    parentId: String
+    imageUrl: String
+    active: Boolean
+    displayOrder: Int
+}
