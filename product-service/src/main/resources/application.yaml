@@ -6,7 +6,7 @@ spring:
     name: product-service
   data:
     mongodb:
-      uri: mongodb://localhost:27017/ecommerce_products
+      uri: mongodb://localhost:27017/blink_products
     redis:
       host: localhost
       port: 6379

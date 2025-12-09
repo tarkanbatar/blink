@@ -29,4 +29,4 @@ management:
 # Logging
 logging:
   level:
-    com.ecommerce.cart: DEBUG
+    com.blink.cart: DEBUG

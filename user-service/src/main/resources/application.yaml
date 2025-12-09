@@ -5,7 +5,7 @@ spring:
   application:
     name: user-service
     mongodb:
-      uri: mongodb://localhost:27017/ecommerce_users
+      uri: mongodb://localhost:27017/blink_users
 
 jwt:
   secret: ${JWT_SECRET:mySecretKeyForJWTTokenGenerationMinimum256BitsLong123456789}
