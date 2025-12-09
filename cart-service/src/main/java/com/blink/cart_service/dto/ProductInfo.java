@@ -18,4 +18,8 @@ public class ProductInfo {
     public boolean isAvailable(int quantity) {
         return active != null && active && stock != null && stock >= quantity;
     }
+
+    public Integer getAvailableQuantity() {
+        return stock != null ? stock : 0;
+    }
 }
