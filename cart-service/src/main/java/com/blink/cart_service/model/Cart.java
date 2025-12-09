@@ -26,6 +26,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Cart {
+
+    @SuppressWarnings("unused")
     private static final long serialVersionUID = 1L;
 
     @Id
