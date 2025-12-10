@@ -1,0 +1,69 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: notification-service
+  mongodb:
+    uri: mongodb://localhost:27017/blink_notifications
+  
+  # Kafka Consumer ayarları
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: notification-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+        spring.json.type.mapping: 
+        orderEvent: com.blink.order_service.model.OrderEvent
+
+  # Email ayarları (Gmail örneği - gerçek credentials kullanmayın!)
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:your-email@gmail.com}
+    password: ${MAIL_PASSWORD:your-app-password}
+    properties:
+      mail: 
+        smtp:
+          auth:  true
+          starttls: 
+            enable: true
+    # Test modu - gerçek email göndermez, sadece loglar
+    test-mode: true
+
+  # Thymeleaf template ayarları
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+    cache: false
+
+# Kafka Topics
+kafka:
+  topics:
+    order-created: order-created
+    order-updated: order-updated
+    order-cancelled: order-cancelled
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance: 
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    com.blink.notification_service: DEBUG
+    org.apache.kafka: WARN

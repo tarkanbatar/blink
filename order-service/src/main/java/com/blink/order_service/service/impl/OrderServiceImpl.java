@@ -25,7 +25,6 @@ import com.blink.order_service.exception.OrderNotFoundException;
 import com.blink.order_service.model.CartInfo;
 import com.blink.order_service.model.CartItemInfo;
 import com.blink.order_service.model.Order;
-import com.blink.order_service.model.OrderEvent;
 import com.blink.order_service.model.OrderItem;
 import com.blink.order_service.model.OrderStatus;
 import com.blink.order_service.model.ShippingAddress;
