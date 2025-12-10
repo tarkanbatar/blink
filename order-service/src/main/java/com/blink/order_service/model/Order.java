@@ -41,6 +41,7 @@ public class Order {
     @Builder.Default
     private OrderStatus status = OrderStatus.PENDING;
 
+    private String statusDescription;
     private BigDecimal subtotal;
 
     @Builder.Default
