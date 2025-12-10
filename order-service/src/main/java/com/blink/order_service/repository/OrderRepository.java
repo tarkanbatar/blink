@@ -16,7 +16,8 @@ public interface OrderRepository extends MongoRepository<Order, String> {
     Optional<Order> findByOrderNumber(String orderNumber);
     
     // User's orders
-    Page<Order> findByUserIdOrderByCreatedAt(String userId, Pageable pageable); 
+    Page<Order> findByUserIdOrderByCreatedAt(String userId, Pageable pageable);
+    Page<Order> findByUserIdOrderByCreatedAtDesc(String userId, Pageable pageable);
     List<Order> findByUserIdAndStatus(String userId, OrderStatus status);
     Page<Order> findByStatus(OrderStatus status, Pageable pageable);
     Page<Order> findByCreatedAtBetween(LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);

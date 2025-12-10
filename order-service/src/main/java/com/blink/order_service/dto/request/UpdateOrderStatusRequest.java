@@ -1,5 +1,6 @@
 package com.blink.order_service.dto.request;
 
+import com.blink.order_service.model.OrderStatus;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -7,7 +8,7 @@ import lombok.Data;
 public class UpdateOrderStatusRequest {
     
     @NotNull(message = "Order status is required")
-    private String status;
+    private OrderStatus status;
     
     private String trackingNumber;
     private String cancellationReason;
