@@ -1,0 +1,95 @@
+type Order {
+    id: ID! 
+    orderNumber: String! 
+    userId: String!
+    userEmail: String
+    items: [OrderItem]!
+    totalItems: Int!
+    shippingAddress: ShippingAddress
+    status: OrderStatus!
+    statusDescription: String!
+    subtotal: Float!
+    shippingCost: Float! 
+    tax: Float!
+    discount: Float!
+    totalAmount: Float!
+    paymentMethod: String
+    paymentReference: String
+    notes: String
+    trackingNumber: String
+    estimatedDeliveryDate: String
+    actualDeliveryDate:  String
+    cancellationReason: String
+    cancellable: Boolean!
+    createdAt: String
+    updatedAt: String
+}
+
+type OrderItem {
+    productId: String!
+    productName: String! 
+    productImage: String
+    sku: String
+    unitPrice: Float!
+    quantity:  Int!
+    totalPrice: Float!
+}
+
+type ShippingAddress {
+    fullName: String!
+    phone: String!
+    addressLine1: String!
+    addressLine2: String
+    city:  String!
+    state: String
+    country: String!
+    zipCode:  String!
+}
+
+enum OrderStatus {
+    PENDING
+    CONFIRMED
+    PROCESSING
+    SHIPPED
+    DELIVERED
+    CANCELLED
+    REFUNDED
+}
+
+type Query {
+    order(id: ID!): Order
+    orderByNumber(orderNumber: String!): Order
+    myOrders(userId: String!, page: Int = 0, size: Int = 10): [Order]!
+    ordersByStatus(status:  OrderStatus!, page: Int = 0, size: Int = 10): [Order]!
+}
+
+type Mutation {
+    createOrder(userId: String!, input: CreateOrderInput!): Order!
+    updateOrderStatus(orderId: ID!, input: UpdateOrderStatusInput!): Order!
+    cancelOrder(orderId: ID!, reason: String): Order!
+}
+
+input CreateOrderInput {
+    shippingAddress: ShippingAddressInput
+    paymentMethod: String!
+    notes: String
+    couponCode: String
+}
+
+input ShippingAddressInput {
+    fullName: String!
+    phone: String!
+    addressLine1: String!
+    addressLine2: String
+    city: String! 
+    state: String
+    country: String!
+    zipCode:  String!
+}
+
+input UpdateOrderStatusInput {
+    status: OrderStatus!
+    trackingNumber:  String
+    cancellationReason: String
+    note: String
+}
