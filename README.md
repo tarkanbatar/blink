@@ -29,14 +29,14 @@
 
 ### Features
 
-- 👤 User registration and authentication
-- 📦 Product catalog and category management
-- 🔍 Advanced product search and filtering
-- 🛒 Shopping cart management (Redis-backed)
-- 📋 Order creation and tracking
-- 📧 Email notifications (Kafka-driven)
-- 📍 Multiple address management
-- ⭐ Featured products
+-  User registration and authentication
+-  Product catalog and category management
+-  Advanced product search and filtering
+-  Shopping cart management (Redis-backed)
+-  Order creation and tracking
+-  Email notifications (Kafka-driven)
+-  Multiple address management
+-  Featured products
 
 ---
 
