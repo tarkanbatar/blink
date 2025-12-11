@@ -25,7 +25,7 @@ public class OrderEventConsumer {
     private final NotificationService notificationService;
 
     @KafkaListener(topics = "${kafka.topics.order-created}",groupId = "${spring.kafka.consumer.group-id}",containerFactory = "kafkaListenerContainerFactory")
-    public void handleOrderCreated(@Payload OrderEvent event, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic, @Header(KafkaHeaders.RECEIVED_PARTITION) int partition, @Header(KafkaHeaders. OFFSET) long offset) {
+    public void handleOrderCreated(@Payload OrderEvent event, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic, @Header(KafkaHeaders.RECEIVED_PARTITION) int partition, @Header(KafkaHeaders.OFFSET) long offset) {
         log.info("Received ORDER_CREATED event. Topic: {} , Partition: {} , Offset: {} , Order: {} ", topic, partition, offset, event.getOrderNumber());
     
         try{
@@ -37,8 +37,8 @@ public class OrderEventConsumer {
     }
 
 
-    @KafkaListener(topics = "${kafka. topics.order-updated}",groupId = "${spring.kafka.consumer.group-id}",containerFactory = "kafkaListenerContainerFactory")
-    public void handleOrderUpdated(@Payload OrderEvent event,@Header(KafkaHeaders. RECEIVED_TOPIC) String topic,@Header(KafkaHeaders.RECEIVED_PARTITION) int partition,@Header(KafkaHeaders.OFFSET) long offset) {
+    @KafkaListener(topics = "${kafka.topics.order-updated}",groupId = "${spring.kafka.consumer.group-id}",containerFactory = "kafkaListenerContainerFactory")
+    public void handleOrderUpdated(@Payload OrderEvent event,@Header(KafkaHeaders.RECEIVED_TOPIC) String topic,@Header(KafkaHeaders.RECEIVED_PARTITION) int partition,@Header(KafkaHeaders.OFFSET) long offset) {
         log.info("Received ORDER_UPDATED event. Topic: {}, Partition: {}, Offset: {}, Order: {}, Status: {}", topic, partition, offset, event.getOrderNumber(), event.getEventType());
 
         try {
@@ -54,7 +54,7 @@ public class OrderEventConsumer {
         log.info("Received ORDER_CANCELLED event. Topic: {}, Partition: {}, Offset: {}, Order: {}", topic, partition, offset, event.getOrderNumber());
 
         try {
-            notificationService. processOrderEvent(event);
+            notificationService.processOrderEvent(event);
         } catch (Exception e) {
             log.error("Error processing ORDER_CANCELLED event for order {}:  {}", event.getOrderNumber(), e.getMessage(), e);
         }
