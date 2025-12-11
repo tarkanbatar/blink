@@ -5,10 +5,9 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-
 import com.blink.notification_service.dto.OrderEvent;
 import com.blink.notification_service.service.EmailService;
-
+import com.blink.notification_service.template.EmailTemplateService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -96,5 +95,4 @@ public class EmailServiceImpl implements EmailService {
             throw new RuntimeException("Email gönderilemedi", e);
         }
     }
-
 }
