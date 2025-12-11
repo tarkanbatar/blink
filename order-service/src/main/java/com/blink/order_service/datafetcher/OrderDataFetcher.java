@@ -25,7 +25,7 @@ public class OrderDataFetcher {
     private final OrderService orderService;
 
     @DgsQuery
-    public OrderResponse orderById(@InputArgument String id) {
+    public OrderResponse order(@InputArgument String id) {
         log.info("GraphQL Fetching order with id: {}", id);
         return orderService.getOrderById(id);
     }

@@ -12,12 +12,8 @@ services:
     restart: unless-stopped
     ports: 
       - "27017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: rootpassword
     volumes:
       - mongodb_data:/data/db
-      - ./docker/mongo-init:/docker-entrypoint-initdb.d
     networks:
       - blink-network
     healthcheck:
@@ -155,7 +151,7 @@ services:
       - "8081:8081"
     environment: 
       - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATA_MONGODB_URI=mongodb://root:rootpassword@mongodb:27017/blink_users?authSource=admin
+      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/blink_users
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
       - JWT_SECRET=mySecretKeyForJWTTokenGenerationMinimum256BitsLong123456789
     depends_on:
@@ -183,7 +179,7 @@ services:
       - "8082:8082"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATA_MONGODB_URI=mongodb://root:rootpassword@mongodb:27017/blink_products?authSource=admin
+      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/blink_products
       - SPRING_DATA_REDIS_HOST=redis
       - SPRING_DATA_REDIS_PORT=6379
       - SPRING_DATA_REDIS_PASSWORD=redispassword
@@ -246,7 +242,7 @@ services:
       - "8084:8084"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATA_MONGODB_URI=mongodb://root:rootpassword@mongodb:27017/blink_orders?authSource=admin
+      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/blink_orders
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
     depends_on:
@@ -280,7 +276,7 @@ services:
       - "8085:8085"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATA_MONGODB_URI=mongodb://root:rootpassword@mongodb:27017/blink_notifications?authSource=admin
+      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/blink_notifications
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
       - SPRING_MAIL_TEST_MODE=true
@@ -312,9 +308,7 @@ services:
     ports: 
       - "8088:8081"
     environment: 
-      ME_CONFIG_MONGODB_ADMINUSERNAME: root
-      ME_CONFIG_MONGODB_ADMINPASSWORD: rootpassword
-      ME_CONFIG_MONGODB_URL: mongodb://root:rootpassword@mongodb:27017/
+      ME_CONFIG_MONGODB_URL: mongodb://mongodb:27017/
       ME_CONFIG_BASICAUTH_USERNAME: admin
       ME_CONFIG_BASICAUTH_PASSWORD: admin123
     depends_on:

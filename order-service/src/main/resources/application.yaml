@@ -21,6 +21,7 @@ kafka:
     order-created: order-created
     order-updated: order-updated
     order-cancelled: order-cancelled
+    order-deleted: order-deleted
 
 eureka:
   client:
