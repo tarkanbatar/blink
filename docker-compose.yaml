@@ -1,86 +1,378 @@
 version: '3.8'
 
 services:
+  # ============================================
+  # INFRASTRUCTURE SERVICES
+  # ============================================
+  
   # MongoDB
   mongodb:
     image: mongo:7.0
     container_name: blink-mongodb
-    ports:
+    restart: unless-stopped
+    ports: 
       - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
     volumes:
       - mongodb_data:/data/db
-    environment:
-      - MONGO_INITDB_DATABASE=blink
+      - ./docker/mongo-init:/docker-entrypoint-initdb.d
     networks:
       - blink-network
+    healthcheck:
+      test:  echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
 
   # Redis
-  redis:
+  redis: 
     image: redis:7-alpine
     container_name: blink-redis
-    ports:
+    restart:  unless-stopped
+    ports: 
       - "6379:6379"
+    command:  redis-server --appendonly yes --requirepass redispassword
     volumes:
       - redis_data:/data
-    command: redis-server --appendonly yes
     networks:
       - blink-network
+    healthcheck:
+      test:  ["CMD", "redis-cli", "-a", "redispassword", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
-  # Kafka + Zookeeper
+  # Zookeeper (Kafka için)
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
     container_name: blink-zookeeper
+    restart: unless-stopped
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+      - zookeeper_data:/var/lib/zookeeper/data
+      - zookeeper_log:/var/lib/zookeeper/log
     networks:
       - blink-network
+    healthcheck:
+      test: echo srvr | nc localhost 2181 || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
-  kafka:
+  # Kafka
+  kafka: 
     image: confluentinc/cp-kafka:7.5.0
     container_name: blink-kafka
+    restart: unless-stopped
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_healthy
     ports:
       - "9092:9092"
+      - "29092:29092"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    volumes:
+      - kafka_data:/var/lib/kafka/data
     networks:
       - blink-network
+    healthcheck: 
+      test: kafka-topics --bootstrap-server localhost:9092 --list || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
-  # MongoDB Express (GUI - Optional)
+  # ============================================
+  # APPLICATION SERVICES
+  # ============================================
+
+  # Discovery Server (Eureka)
+  discovery-server:
+    build: 
+      context: ./discovery-server
+      dockerfile: Dockerfile
+    container_name: blink-discovery-server
+    restart: unless-stopped
+    ports:
+      - "8761:8761"
+    environment: 
+      - SPRING_PROFILES_ACTIVE=docker
+    networks:
+      - blink-network
+    healthcheck:
+      test: wget -qO- http://localhost:8761/actuator/health || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: blink-api-gateway
+    restart:  unless-stopped
+    ports: 
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+    networks:
+      - blink-network
+    healthcheck:
+      test: wget -qO- http://localhost:8080/actuator/health || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # User Service
+  user-service: 
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    container_name: blink-user-service
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment: 
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATA_MONGODB_URI=mongodb://root:rootpassword@mongodb:27017/blink_users?authSource=admin
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+      - JWT_SECRET=mySecretKeyForJWTTokenGenerationMinimum256BitsLong123456789
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    networks:
+      - blink-network
+    healthcheck:
+      test: wget -qO- http://localhost:8081/actuator/health || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # Product Service
+  product-service:
+    build: 
+      context: ./product-service
+      dockerfile: Dockerfile
+    container_name: blink-product-service
+    restart: unless-stopped
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATA_MONGODB_URI=mongodb://root:rootpassword@mongodb:27017/blink_products?authSource=admin
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+      - SPRING_DATA_REDIS_PASSWORD=redispassword
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      redis: 
+        condition: service_healthy
+    networks:
+      - blink-network
+    healthcheck: 
+      test: wget -qO- http://localhost:8082/actuator/health || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # Cart Service
+  cart-service:
+    build:
+      context: ./cart-service
+      dockerfile: Dockerfile
+    container_name: blink-cart-service
+    restart: unless-stopped
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+      - SPRING_DATA_REDIS_PASSWORD=redispassword
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+    depends_on: 
+      discovery-server:
+        condition: service_healthy
+      redis: 
+        condition: service_healthy
+      product-service:
+        condition: service_healthy
+    networks:
+      - blink-network
+    healthcheck:
+      test: wget -qO- http://localhost:8083/actuator/health || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # Order Service
+  order-service:
+    build: 
+      context: ./order-service
+      dockerfile: Dockerfile
+    container_name: blink-order-service
+    restart: unless-stopped
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATA_MONGODB_URI=mongodb://root:rootpassword@mongodb:27017/blink_orders?authSource=admin
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+    depends_on:
+      discovery-server:
+        condition:  service_healthy
+      mongodb: 
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      cart-service:
+        condition: service_healthy
+      product-service:
+        condition:  service_healthy
+    networks: 
+      - blink-network
+    healthcheck:
+      test:  wget -qO- http://localhost:8084/actuator/health || exit 1
+      interval:  30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # Notification Service
+  notification-service:
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+    container_name: blink-notification-service
+    restart: unless-stopped
+    ports: 
+      - "8085:8085"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATA_MONGODB_URI=mongodb://root:rootpassword@mongodb:27017/blink_notifications?authSource=admin
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+      - SPRING_MAIL_TEST_MODE=true
+    depends_on: 
+      discovery-server:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      kafka:
+        condition:  service_healthy
+    networks:
+      - blink-network
+    healthcheck: 
+      test: wget -qO- http://localhost:8085/actuator/health || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # ============================================
+  # MONITORING & MANAGEMENT (Opsiyonel)
+  # ============================================
+
+  # Mongo Express (MongoDB GUI)
   mongo-express:
     image: mongo-express:latest
     container_name: blink-mongo-express
-    ports:
+    restart: unless-stopped
+    ports: 
       - "8088:8081"
-    environment:
-      - ME_CONFIG_MONGODB_SERVER=mongodb
+    environment: 
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: rootpassword
+      ME_CONFIG_MONGODB_URL: mongodb://root:rootpassword@mongodb:27017/
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: admin123
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
     networks:
       - blink-network
 
-  # Redis Commander (GUI - Optional)
+  # Redis Commander (Redis GUI)
   redis-commander:
     image: rediscommander/redis-commander:latest
     container_name: blink-redis-commander
-    ports:
+    restart:  unless-stopped
+    ports: 
       - "8089:8081"
-    environment:
-      - REDIS_HOSTS=local:redis:6379
+    environment: 
+      REDIS_HOSTS: local:redis:6379:0:redispassword
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
     networks:
       - blink-network
 
-volumes:
-  mongodb_data:
-  redis_data:
+  # Kafka UI
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: blink-kafka-ui
+    restart: unless-stopped
+    ports:
+      - "8090:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    depends_on:
+      kafka: 
+        condition: service_healthy
+    networks:
+      - blink-network
 
-networks:
-  blink-network:
+# ============================================
+# VOLUMES
+# ============================================
+volumes:
+  mongodb_data: 
+    driver: local
+  redis_data:
+    driver: local
+  zookeeper_data:
+    driver: local
+  zookeeper_log:
+    driver: local
+  kafka_data: 
+    driver: local
+
+# ============================================
+# NETWORKS
+# ============================================
+networks: 
+  blink-network: 
     driver: bridge

@@ -1,0 +1,16 @@
+spring:
+  mongodb:
+    uri: ${SPRING_DATA_MONGODB_URI}
+  data:
+    kafka:
+      bootstrap-servers:  ${SPRING_KAFKA_BOOTSTRAP_SERVERS}
+  mail:
+    test-mode: ${SPRING_MAIL_TEST_MODE:true}
+
+eureka:
+  client:
+    service-url: 
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE}
+  instance: 
+    prefer-ip-address:  true
+    hostname: notification-service
