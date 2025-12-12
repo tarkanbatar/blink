@@ -1,29 +1,29 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: product-service
+  name: order-service
   namespace: blink
   labels:
-    app: product-service
+    app: order-service
 spec:
   replicas: 2
   selector:
     matchLabels: 
-      app: product-service
+      app: order-service
   template:
     metadata:
       labels:
-        app: product-service
+        app: order-service
     spec:
       containers:
-      - name: product-service
-        image: blink-product-service:latest
-        imagePullPolicy: IfNotPresent
+      - name: order-service
+        image: blink/order-service:latest
+        imagePullPolicy:  Never
         ports:
-        - containerPort: 8082
+        - containerPort: 8084
         envFrom:
         - configMapRef:
-            name: product-service-config
+            name: order-service-config
         env: 
         - name: SPRING_DATA_MONGODB_USERNAME
           valueFrom:
@@ -35,11 +35,6 @@ spec:
             secretKeyRef:
               name: mongodb-secret
               key: mongo-root-password
-        - name: SPRING_DATA_REDIS_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: redis-secret
-              key: redis-password
         resources:
           requests:
             memory: "256Mi"
@@ -50,12 +45,12 @@ spec:
         livenessProbe:
           httpGet:
             path: /actuator/health/liveness
-            port: 8082
+            port: 8084
           initialDelaySeconds:  60
           periodSeconds: 10
         readinessProbe:
           httpGet:
             path: /actuator/health/readiness
-            port: 8082
-          initialDelaySeconds: 30
+            port: 8084
+          initialDelaySeconds:  30
           periodSeconds: 5
