@@ -17,8 +17,8 @@ spec:
     spec:
       containers:
       - name: order-service
-        image: blink-order-service:latest
-        imagePullPolicy: IfNotPresent
+        image: blink/order-service:latest
+        imagePullPolicy:  Never
         ports:
         - containerPort: 8084
         envFrom:

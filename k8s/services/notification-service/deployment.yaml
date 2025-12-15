@@ -1,30 +1,30 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: notification-service
+  name: order-service
   namespace: blink
   labels:
-    app: notification-service
+    app: order-service
 spec:
   replicas: 2
-  selector: 
-    matchLabels:
-      app: notification-service
+  selector:
+    matchLabels: 
+      app: order-service
   template:
     metadata:
       labels:
-        app: notification-service
+        app: order-service
     spec:
-      containers: 
-      - name: notification-service
-        image: blink-notification-service:latest
-        imagePullPolicy: IfNotPresent
+      containers:
+      - name: order-service
+        image: blink/order-service:latest
+        imagePullPolicy:  Never
         ports:
-        - containerPort: 8085
+        - containerPort: 8084
         envFrom:
         - configMapRef:
-            name: notification-service-config
-        env:
+            name: order-service-config
+        env: 
         - name: SPRING_DATA_MONGODB_USERNAME
           valueFrom:
             secretKeyRef: 
@@ -32,25 +32,25 @@ spec:
               key: mongo-root-username
         - name: SPRING_DATA_MONGODB_PASSWORD
           valueFrom:
-            secretKeyRef: 
+            secretKeyRef:
               name: mongodb-secret
               key: mongo-root-password
         resources:
-          requests: 
+          requests:
             memory: "256Mi"
             cpu: "250m"
           limits:
-            memory:  "512Mi"
-            cpu:  "500m"
+            memory: "512Mi"
+            cpu: "500m"
         livenessProbe:
           httpGet:
             path: /actuator/health/liveness
-            port: 8085
-          initialDelaySeconds: 60
+            port: 8084
+          initialDelaySeconds:  60
           periodSeconds: 10
         readinessProbe:
           httpGet:
             path: /actuator/health/readiness
-            port: 8085
-          initialDelaySeconds: 30
+            port: 8084
+          initialDelaySeconds:  30
           periodSeconds: 5

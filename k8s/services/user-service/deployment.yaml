@@ -1,33 +1,33 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: user-service
+  name: order-service
   namespace: blink
   labels:
-    app: user-service
+    app: order-service
 spec:
   replicas: 2
   selector:
-    matchLabels:
-      app: user-service
+    matchLabels: 
+      app: order-service
   template:
     metadata:
       labels:
-        app: user-service
-    spec: 
+        app: order-service
+    spec:
       containers:
-      - name: user-service
-        image:  blink-user-service:latest
-        imagePullPolicy: IfNotPresent
-        ports: 
-        - containerPort: 8081
+      - name: order-service
+        image: blink/order-service:latest
+        imagePullPolicy:  Never
+        ports:
+        - containerPort: 8084
         envFrom:
         - configMapRef:
-            name: user-service-config
-        env:
+            name: order-service-config
+        env: 
         - name: SPRING_DATA_MONGODB_USERNAME
           valueFrom:
-            secretKeyRef:
+            secretKeyRef: 
               name: mongodb-secret
               key: mongo-root-username
         - name: SPRING_DATA_MONGODB_PASSWORD
@@ -35,12 +35,7 @@ spec:
             secretKeyRef:
               name: mongodb-secret
               key: mongo-root-password
-        - name: JWT_SECRET
-          valueFrom: 
-            secretKeyRef:
-              name: user-service-secret
-              key:  jwt-secret
-        resources: 
+        resources:
           requests:
             memory: "256Mi"
             cpu: "250m"
@@ -50,13 +45,12 @@ spec:
         livenessProbe:
           httpGet:
             path: /actuator/health/liveness
-            port: 8081
+            port: 8084
           initialDelaySeconds:  60
           periodSeconds: 10
-          failureThreshold: 3
         readinessProbe:
           httpGet:
             path: /actuator/health/readiness
-            port: 8081
-          initialDelaySeconds: 30
+            port: 8084
+          initialDelaySeconds:  30
           periodSeconds: 5
