@@ -5,8 +5,11 @@
 ![Java](https://img.shields.io/badge/Java-21-orange?style=for-the-badge&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.5-brightgreen?style=for-the-badge&logo=springboot&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-7.0-green?style=for-the-badge&logo=mongodb&logoColor=white)
+### Core Features
+
 ![Redis](https://img.shields.io/badge/Redis-7-red?style=for-the-badge&logo=redis&logoColor=white)
 ![Apache Kafka](https://img.shields.io/badge/Kafka-7.5.0-black?style=for-the-badge&logo=apachekafka&logoColor=white)
+
 ![Docker](https://img.shields.io/badge/Docker-24-blue?style=for-the-badge&logo=docker&logoColor=white)
 ![GraphQL](https://img.shields.io/badge/GraphQL-E10098?style=for-the-badge&logo=graphql&logoColor=white)
 
@@ -208,7 +211,7 @@
 
 ---
 
-## 🛠 Technologies
+## Technologies
 
 ### Backend
 | Technology | Version | Description |
@@ -361,6 +364,52 @@ docker-compose down
 
 # Remove everything including volumes (WARNING: Data will be lost!)
 docker-compose down -v --rmi all
+```
+
+### Minikube Deployment (Windows, current setup)
+
+Prerequisites:
+- Minikube with Docker driver and `ingress` addon enabled
+- kubectl and Docker available in the shell
+- Suggested: at least 4 CPUs, 8 GB RAM, and 20 GB free disk space
+
+Steps:
+1. Start Minikube with ingress enabled:
+
+```powershell
+minikube start --driver=docker --cpus=4 --memory=8192 --addons=ingress
+```
+
+2. Build images inside the Minikube Docker daemon and deploy everything:
+
+```powershell
+cd C:\Users\USERNANE\Workspace\blink
+minikube -p minikube docker-env --shell powershell | Invoke-Expression
+.\k8s\deploy-minikube.ps1
+```
+
+The script builds all service images with the `blink/<service>:latest` tag (deployments use `imagePullPolicy: Never`), creates the `blink` namespace, applies required secrets/configs, deploys MongoDB, Redis, Kafka, all services, and the ingress.
+
+3. Map the ingress host to the Minikube IP:
+
+```powershell
+minikube ip
+# Add the output IP to C:\Windows\System32\drivers\etc\hosts
+# <ip> api.blink.local
+```
+
+4. Verify and call the API:
+
+```powershell
+kubectl get pods -n blink
+kubectl get ingress -n blink
+curl http://api.blink.local/api/products
+```
+
+Cleanup:
+
+```powershell
+kubectl delete namespace blink
 ```
 
 ---
@@ -1601,7 +1650,7 @@ SOFTWARE.
 
 ---
 
-## 👨‍💻 Author
+## Author
 
 **Tarkan Batar**
 
@@ -1615,6 +1664,5 @@ SOFTWARE.
 
 ---
 
-Made by Tarkan Batar
 
 </div>
