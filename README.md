@@ -5,12 +5,10 @@
 ![Java](https://img.shields.io/badge/Java-21-orange?style=for-the-badge&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.5-brightgreen?style=for-the-badge&logo=springboot&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-7.0-green?style=for-the-badge&logo=mongodb&logoColor=white)
-### Core Features
-
 ![Redis](https://img.shields.io/badge/Redis-7-red?style=for-the-badge&logo=redis&logoColor=white)
 ![Apache Kafka](https://img.shields.io/badge/Kafka-7.5.0-black?style=for-the-badge&logo=apachekafka&logoColor=white)
-
 ![Docker](https://img.shields.io/badge/Docker-24-blue?style=for-the-badge&logo=docker&logoColor=white)
+![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)
 ![GraphQL](https://img.shields.io/badge/GraphQL-E10098?style=for-the-badge&logo=graphql&logoColor=white)
 
 </div>
@@ -239,6 +237,8 @@
 |-----------|----------|----------|
 | Docker | 24.x | Containerization |
 | Docker Compose | 2.x | Container orchestration |
+| Kubernetes | 1.28+ | Container orchestration |
+| Minikube | 1.32+ | Local Kubernetes cluster |
 
 ### Other Libraries
 | Technology | Usage |
