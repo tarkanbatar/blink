@@ -1,33 +1,33 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: order-service
+  name: notification-service
   namespace: blink
   labels:
-    app: order-service
+    app: notification-service
 spec:
   replicas: 2
   selector:
-    matchLabels: 
-      app: order-service
+    matchLabels:
+      app: notification-service
   template:
     metadata:
       labels:
-        app: order-service
+        app: notification-service
     spec:
       containers:
-      - name: order-service
-        image: blink/order-service:latest
-        imagePullPolicy:  Never
+      - name: notification-service
+        image: blink/notification-service:latest
+        imagePullPolicy: Never
         ports:
-        - containerPort: 8084
+        - containerPort: 8085
         envFrom:
         - configMapRef:
-            name: order-service-config
-        env: 
+            name: notification-service-config
+        env:
         - name: SPRING_DATA_MONGODB_USERNAME
           valueFrom:
-            secretKeyRef: 
+            secretKeyRef:
               name: mongodb-secret
               key: mongo-root-username
         - name: SPRING_DATA_MONGODB_PASSWORD
@@ -45,12 +45,12 @@ spec:
         livenessProbe:
           httpGet:
             path: /actuator/health/liveness
-            port: 8084
-          initialDelaySeconds:  60
+            port: 8085
+          initialDelaySeconds: 60
           periodSeconds: 10
         readinessProbe:
           httpGet:
             path: /actuator/health/readiness
-            port: 8084
-          initialDelaySeconds:  30
+            port: 8085
+          initialDelaySeconds: 30
           periodSeconds: 5

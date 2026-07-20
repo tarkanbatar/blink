@@ -1,40 +1,29 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: order-service
+  name: discovery-server
   namespace: blink
   labels:
-    app: order-service
+    app: discovery-server
 spec:
-  replicas: 2
+  replicas: 1
   selector:
-    matchLabels: 
-      app: order-service
+    matchLabels:
+      app: discovery-server
   template:
     metadata:
       labels:
-        app: order-service
+        app: discovery-server
     spec:
       containers:
-      - name: order-service
-        image: blink/order-service:latest
-        imagePullPolicy:  Never
+      - name: discovery-server
+        image: blink/discovery-server:latest
+        imagePullPolicy: Never
         ports:
-        - containerPort: 8084
-        envFrom:
-        - configMapRef:
-            name: order-service-config
-        env: 
-        - name: SPRING_DATA_MONGODB_USERNAME
-          valueFrom:
-            secretKeyRef: 
-              name: mongodb-secret
-              key: mongo-root-username
-        - name: SPRING_DATA_MONGODB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: mongodb-secret
-              key: mongo-root-password
+        - containerPort: 8761
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "kubernetes"
         resources:
           requests:
             memory: "256Mi"
@@ -43,14 +32,12 @@ spec:
             memory: "512Mi"
             cpu: "500m"
         livenessProbe:
-          httpGet:
-            path: /actuator/health/liveness
-            port: 8084
-          initialDelaySeconds:  60
+          tcpSocket:
+            port: 8761
+          initialDelaySeconds: 60
           periodSeconds: 10
         readinessProbe:
-          httpGet:
-            path: /actuator/health/readiness
-            port: 8084
-          initialDelaySeconds:  30
+          tcpSocket:
+            port: 8761
+          initialDelaySeconds: 30
           periodSeconds: 5
